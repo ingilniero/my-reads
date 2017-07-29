@@ -2,6 +2,7 @@ import React from 'react'
 import * as BooksAPI from './BooksAPI'
 import ListBooks from './ListBooks'
 import SearchBooks from './SearchBooks'
+import groupBy from 'group-by'
 import './App.css'
 
 class BooksApp extends React.Component {
@@ -12,7 +13,7 @@ class BooksApp extends React.Component {
      * users can use the browser's back and forward buttons to navigate between
      * pages, as well as provide a good URL they can bookmark and share.
      */
-    showSearchPage: true,
+    showSearchPage: false,
     books: []
   }
 
@@ -26,13 +27,14 @@ class BooksApp extends React.Component {
 
   render () {
     const { books } = this.state
+    const groupedBooks = groupBy(books, 'shelf')
 
     return (
       <div className="app">
         {this.state.showSearchPage ? (
           <SearchBooks books={books}/>
         ) : (
-          <ListBooks />
+          <ListBooks books={groupedBooks}/>
         )}
       </div>
     )
