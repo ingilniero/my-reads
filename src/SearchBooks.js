@@ -1,29 +1,72 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
+import * as BooksAPI from './BooksAPI'
 import { Link } from 'react-router-dom'
 import Book from './Book'
+import PropTypes from 'prop-types'
+import SearchInput from './SearchInput'
 
 class SearchBooks extends Component {
+  MAX_RESULTS = 10
+
   static propTypes = {
-    books: PropTypes.array.isRequired
+    history: PropTypes.object.isRequired
+  }
+
+  state = {
+    query: '',
+    books: []
+  }
+
+  componentDidMount () {
+    const { history } = this.props
+    const query =  history.location.search.split("=")[1]
+
+    query && this.updateQuery(query)
+  }
+
+  updateQuery = (query) => {
+    this.updateHistory(query)
+    this.setState({
+      query: query
+    })
+    this.searchBooks(query)
+  }
+
+  updateHistory = (query) => {
+    const { history } = this.props
+
+    history.push({
+      pathname: history.location.pathname,
+      search: query ? `?query=${query}` : ''
+    })
+  }
+
+  searchBooks = (query) => {
+    if (query === '') {
+      this.setState({
+        books: []
+      })
+    } else {
+      BooksAPI.search(query, this.MAX_RESULTS).then((books) => {
+        this.setState({
+          books: books && books.error === undefined ? books : []
+        })
+      })
+    }
   }
 
   render () {
-    const { books } = this.props
+    const { books, query } = this.state
 
     return (
       <div className="search-books">
         <div className="search-books-bar">
           <Link className="close-search" to='/'>Close</Link>
+
           <div className="search-books-input-wrapper">
-            {/*
-              NOTES: The search from BooksAPI is limited to a particular set of search terms.
-              You can find these search terms here:
-              https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
-              However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-              you don't find a specific author or title. Every search is limited by search terms.
-            */}
-            <input type="text" placeholder="Search by title or author"/>
+            <SearchInput
+              query={query}
+              onQueryChange={this.updateQuery} />
           </div>
         </div>
         <div className="search-books-results">
@@ -34,10 +77,10 @@ class SearchBooks extends Component {
                   <Book
                     title={book.title}
                     shelf={book.shelf}
-                    authors={book.authors.reduce((authors, author) => (
+                    authors={book.authors && book.authors.reduce((authors, author) => (
                       authors += ` / ${author}`
                     ))}
-                    thumbnail={book.imageLinks.smallThumbnail}
+                    thumbnail={book.imageLinks && book.imageLinks.smallThumbnail}
                   />
                 </li>
               ))

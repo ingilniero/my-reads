@@ -29,8 +29,8 @@ class BooksApp extends React.Component {
           <ListBooks books={groupedBooks}/>
         )} />
 
-        <Route path='/search' render={() => (
-          <SearchBooks books={books}/>
+        <Route path='/search' render={({history}) => (
+          <SearchBooks history={history} />
         )} />
       </div>
     )
