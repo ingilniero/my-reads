@@ -24,10 +24,10 @@ class Bookshelf extends Component {
                     onBookUpdate={onBookUpdate}
                     title={book.title}
                     shelf={book.shelf}
-                    authors={book.authors.reduce((authors, author) => (
+                    authors={book.authors && book.authors.reduce((authors, author) => (
                       authors += ` / ${author}`
                     ))}
-                    thumbnail={book.imageLinks.smallThumbnail}
+                    thumbnail={book.imageLinks && book.imageLinks.smallThumbnail}
                   />
                 </li>
               ))

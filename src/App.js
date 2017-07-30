@@ -60,9 +60,27 @@ class BooksApp extends React.Component {
         searchResults: []
       })
     } else {
-      BooksAPI.search(query, this.MAX_RESULTS).then((books) => {
+      BooksAPI.search(query, this.MAX_RESULTS).then((response) => {
+        const books = response && response.error === undefined ? response : []
+        const { myReads } = this.state
+
+        const myReadsById = myReads.reduce((acc, book) => {
+          acc[book.id] = book
+          return acc
+        }, {})
+
+        const searchResults = books.map((book) => {
+          const myBook = myReadsById[book.id]
+
+          if (myBook) {
+            book.shelf = myBook.shelf
+          }
+
+          return book
+        })
+
         this.setState({
-          searchResults: books && books.error === undefined ? books : []
+          searchResults: searchResults
         })
       })
     }
