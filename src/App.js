@@ -8,36 +8,69 @@ import './App.css'
 
 class BooksApp extends React.Component {
   state = {
-    books: []
+    query: '',
+    myReads: [],
+    searchResults: []
+  }
+
+  updateQuery = (query) => {
+    this.setState({
+      query: query
+    })
+
+    this.searchBooks(query)
   }
 
   componentDidMount () {
     BooksAPI.getAll().then((books) => {
       this.setState({
-        books: books
+        myReads: books
       })
     })
+  }
+
+  updateBooks = (books, bookId, shelf) => {
+    const updatedBooks = books.map((book) => {
+      if (book.id === bookId) {
+        book.shelf = shelf
+      }
+
+      return book
+    })
+
+    return updatedBooks
   }
 
   updateBook = (bookId, shelf) => {
     BooksAPI.update({ id: bookId }, shelf).then((updatedBooks) => {
-      const books = this.state.books.map((book) => {
-        if (book.id === bookId) {
-          book.shelf = shelf
-        }
-
-        return book
-      })
+      const { myReads, searchResults } = this.state
+      const updatedReads = this.updateBooks(myReads, bookId, shelf)
+      const updatedSearchResults = this.updateBooks(searchResults, bookId, shelf)
 
       this.setState({
-        books: books
+        myReads: updatedReads,
+        searchResults: updatedSearchResults
       })
     })
   }
 
+  searchBooks = (query) => {
+    if (query === '') {
+      this.setState({
+        searchResults: []
+      })
+    } else {
+      BooksAPI.search(query, this.MAX_RESULTS).then((books) => {
+        this.setState({
+          searchResults: books && books.error === undefined ? books : []
+        })
+      })
+    }
+  }
+
   render () {
-    const { books } = this.state
-    const groupedBooks = groupBy(books, 'shelf')
+    const { myReads, searchResults } = this.state
+    const groupedBooks = groupBy(myReads, 'shelf')
 
     return (
       <div className="app">
@@ -50,6 +83,9 @@ class BooksApp extends React.Component {
         <Route path='/search' render={({history}) => (
           <SearchBooks
             updateBook={this.updateBook}
+            query={this.state.query}
+            books={searchResults}
+            updateQuery={this.updateQuery}
             history={history} />
         )} />
       </div>

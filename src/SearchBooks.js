@@ -10,27 +10,35 @@ class SearchBooks extends Component {
 
   static propTypes = {
     history: PropTypes.object.isRequired,
-    updateBook: PropTypes.func
-  }
-
-  state = {
-    query: '',
-    books: []
+    query: PropTypes.string.isRequired,
+    books: PropTypes.array.isRequired,
+    updateBook: PropTypes.func,
+    updateQuery: PropTypes.func
   }
 
   componentDidMount () {
     const { history } = this.props
     const query =  history.location.search.split("=")[1]
 
-    query && this.updateQuery(query)
+    query && this.handleQueryChange(query)
   }
 
-  updateQuery = (query) => {
+  componentWillUnmount () {
+    const { updateQuery } = this.props
+
+    if (updateQuery) {
+      updateQuery('')
+    }
+  }
+
+  handleQueryChange = (query) => {
+    const { updateQuery } = this.props
+
     this.updateHistory(query)
-    this.setState({
-      query: query
-    })
-    this.searchBooks(query)
+
+    if (updateQuery) {
+      updateQuery(query)
+    }
   }
 
   updateHistory = (query) => {
@@ -42,20 +50,6 @@ class SearchBooks extends Component {
     })
   }
 
-  searchBooks = (query) => {
-    if (query === '') {
-      this.setState({
-        books: []
-      })
-    } else {
-      BooksAPI.search(query, this.MAX_RESULTS).then((books) => {
-        this.setState({
-          books: books && books.error === undefined ? books : []
-        })
-      })
-    }
-  }
-
   handleBookUpdate = (bookId, shelf) => {
     const { updateBook } = this.props
 
@@ -65,7 +59,7 @@ class SearchBooks extends Component {
   }
 
   render () {
-    const { books, query } = this.state
+    const { books, query } = this.props
 
     return (
       <div className="search-books">
@@ -75,7 +69,7 @@ class SearchBooks extends Component {
           <div className="search-books-input-wrapper">
             <SearchInput
               query={query}
-              onQueryChange={this.updateQuery} />
+              onQueryChange={this.handleQueryChange} />
           </div>
         </div>
         <div className="search-books-results">
