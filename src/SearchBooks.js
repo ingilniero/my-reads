@@ -9,7 +9,8 @@ class SearchBooks extends Component {
   MAX_RESULTS = 10
 
   static propTypes = {
-    history: PropTypes.object.isRequired
+    history: PropTypes.object.isRequired,
+    updateBook: PropTypes.func
   }
 
   state = {
@@ -55,6 +56,14 @@ class SearchBooks extends Component {
     }
   }
 
+  handleBookUpdate = (bookId, shelf) => {
+    const { updateBook } = this.props
+
+    if (updateBook) {
+      updateBook(bookId, shelf)
+    }
+  }
+
   render () {
     const { books, query } = this.state
 
@@ -75,6 +84,8 @@ class SearchBooks extends Component {
               books.map((book) => (
                 <li key={book.id}>
                   <Book
+                    id={book.id}
+                    onBookUpdate={this.handleBookUpdate}
                     title={book.title}
                     shelf={book.shelf}
                     authors={book.authors && book.authors.reduce((authors, author) => (

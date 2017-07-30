@@ -6,7 +6,16 @@ import { Link } from 'react-router-dom'
 
 class ListBooks extends Component {
   static propTypes = {
-    books: PropTypes.object.isRequired
+    books: PropTypes.object.isRequired,
+    updateBook: PropTypes.func
+  }
+
+  handleBookUpdate = (bookId, shelf) => {
+    const { updateBook } = this.props
+
+    if (updateBook) {
+      updateBook(bookId, shelf)
+    }
   }
 
   render () {
@@ -28,7 +37,8 @@ class ListBooks extends Component {
                   <Bookshelf
                     key={bookshelf.id}
                     name={bookshelf.name}
-                    books={books[bookshelf.id]} />
+                    books={books[bookshelf.id]}
+                    onBookUpdate={this.handleBookUpdate} />
               ))
             }
           </div>

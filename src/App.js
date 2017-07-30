@@ -19,6 +19,22 @@ class BooksApp extends React.Component {
     })
   }
 
+  updateBook = (bookId, shelf) => {
+    BooksAPI.update({ id: bookId }, shelf).then((updatedBooks) => {
+      const books = this.state.books.map((book) => {
+        if (book.id === bookId) {
+          book.shelf = shelf
+        }
+
+        return book
+      })
+
+      this.setState({
+        books: books
+      })
+    })
+  }
+
   render () {
     const { books } = this.state
     const groupedBooks = groupBy(books, 'shelf')
@@ -26,11 +42,15 @@ class BooksApp extends React.Component {
     return (
       <div className="app">
         <Route exact path='/' render={() => (
-          <ListBooks books={groupedBooks}/>
+          <ListBooks
+            updateBook={this.updateBook}
+            books={groupedBooks}/>
         )} />
 
         <Route path='/search' render={({history}) => (
-          <SearchBooks history={history} />
+          <SearchBooks
+            updateBook={this.updateBook}
+            history={history} />
         )} />
       </div>
     )
